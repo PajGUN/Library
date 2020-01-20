@@ -26,14 +26,16 @@ import java.util.Set;
 @EnableTransactionManagement
 public class BorrowerService {
 
-    @Autowired
-    private BorrowerRepository borrowerRepository;
+    private final BorrowerRepository borrowerRepository;
+    private final BookRepository bookRepository;
+    private final ClientRepository clientRepository;
 
     @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private ClientRepository clientRepository;
+    public BorrowerService(BorrowerRepository borrowerRepository, BookRepository bookRepository, ClientRepository clientRepository) {
+        this.borrowerRepository = borrowerRepository;
+        this.bookRepository = bookRepository;
+        this.clientRepository = clientRepository;
+    }
 
     @Transactional
     public List<BookDto> addBookToClient(Borrower borrower) {

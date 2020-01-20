@@ -16,8 +16,12 @@ import java.util.List;
 @RequestMapping("api/report")
 public class ReportController {
 
+    private final ReportService reportService;
+
     @Autowired
-    ReportService reportService;
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
+    }
 
     @GetMapping("/bookcount")
     public ResponseEntity<BookCountDto> getAllBookCount(){

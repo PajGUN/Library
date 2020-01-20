@@ -13,11 +13,14 @@ import ru.sunbrothers.library.service.ReportService;
 @Slf4j
 public class SchedulerService {
 
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
+    private final ReportService reportService;
 
     @Autowired
-    ReportService reportService;
+    public SchedulerService(EmailService emailService, ReportService reportService) {
+        this.emailService = emailService;
+        this.reportService = reportService;
+    }
 
     @Scheduled(cron = "${cron.work}")
     public void sendMsgToClients(){

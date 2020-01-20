@@ -2,6 +2,7 @@ package ru.sunbrothers.library.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,14 @@ import java.util.*;
 @EnableTransactionManagement
 public class AuthorService {
 
+    private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
+
     @Autowired
-    private AuthorRepository authorRepository;
-    @Autowired
-    private BookRepository bookRepository;
+    public AuthorService(AuthorRepository authorRepository, BookRepository bookRepository) {
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
+    }
 
     @Transactional
     public AuthorDto getAuthorById(Long id){
@@ -37,9 +42,9 @@ public class AuthorService {
     }
 
     @Transactional
-    public List<AuthorDto> getAllAuthors(){
+    public List<AuthorDto> getAllAuthors(Pageable pageable){
         List<AuthorDto> authorList = new ArrayList<>();
-        for (Author author : authorRepository.findAll()) {
+        for (Author author : authorRepository.findAll(pageable)) {
             AuthorDto authorDto = getAuthorDto(author);
             authorList.add(authorDto);
         }

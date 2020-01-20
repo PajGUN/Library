@@ -1,6 +1,9 @@
 package ru.sunbrothers.library.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +21,19 @@ import java.util.List;
 @RequestMapping("api/client")
 public class ClientController {
 
-    @Autowired
-    private ClientService clientService;
+    private final ClientService clientService;
+    private final BorrowerService borrowerService;
 
     @Autowired
-    private BorrowerService borrowerService;
+    public ClientController(ClientService clientService, BorrowerService borrowerService) {
+        this.clientService = clientService;
+        this.borrowerService = borrowerService;
+    }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ClientDto>> getAllClients(){
-        List<ClientDto> clientDtos = clientService.getAllClients();
+    public ResponseEntity<List<ClientDto>> getAllClients(
+            @PageableDefault(sort = {"lastName", "firstName"},direction = Sort.Direction.ASC) Pageable pageable){
+        List<ClientDto> clientDtos = clientService.getAllClients(pageable);
         if (clientDtos.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(clientDtos);
     }

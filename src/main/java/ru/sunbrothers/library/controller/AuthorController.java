@@ -1,6 +1,9 @@
 package ru.sunbrothers.library.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.sunbrothers.library.dto.AuthorDto;
@@ -14,13 +17,17 @@ import java.util.List;
 @RequestMapping("api/author")
 public class AuthorController {
 
-    @Autowired
-    private AuthorService authorService;
+    private final AuthorService authorService;
 
+    @Autowired
+    public AuthorController(AuthorService authorService) {
+        this.authorService = authorService;
+    }
 
     @GetMapping("/all")
-    public ResponseEntity<List<AuthorDto>> getAllAuthors(){
-        List<AuthorDto> authors = authorService.getAllAuthors();
+    public ResponseEntity<List<AuthorDto>> getAllAuthors(
+            @PageableDefault(sort = {"lastName", "firstName"},direction = Sort.Direction.ASC)Pageable pageable){
+        List<AuthorDto> authors = authorService.getAllAuthors(pageable);
         if (authors.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(authors);
     }
@@ -68,7 +75,8 @@ public class AuthorController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<AuthorDto> updateAuthor(@PathVariable Long id, @Valid @RequestBody Author author){
+    public ResponseEntity<AuthorDto> updateAuthor(@PathVariable Long id,
+                                                  @Valid @RequestBody Author author){
         AuthorDto authorById = authorService.getAuthorById(id);
         if (authorById == null) return ResponseEntity.notFound().build();
         author.setId(id);

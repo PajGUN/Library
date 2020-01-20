@@ -27,14 +27,19 @@ import java.util.Set;
 @EnableTransactionManagement
 public class ReportService {
 
+    private final BookRepository bookRepository;
+    private final ClientRepository clientRepository;
+    private final BorrowerRepository borrowerRepository;
+    private final Environment env;
+
     @Autowired
-    private BookRepository bookRepository;
-    @Autowired
-    private ClientRepository clientRepository;
-    @Autowired
-    private BorrowerRepository borrowerRepository;
-    @Autowired
-    private Environment env;
+    public ReportService(BookRepository bookRepository, ClientRepository clientRepository,
+                         BorrowerRepository borrowerRepository, Environment env) {
+        this.bookRepository = bookRepository;
+        this.clientRepository = clientRepository;
+        this.borrowerRepository = borrowerRepository;
+        this.env = env;
+    }
 
 
     @Transactional
@@ -55,7 +60,7 @@ public class ReportService {
 
     @Transactional
     public List<ClientDtoExpired> getAllClientsWithExpiredBooks() {
-        long loanTime = Long.parseLong(env.getProperty("loan.time"));
+        Long loanTime = Long.parseLong(env.getProperty("loan.time"));
         LocalDate localDate = LocalDate.now().minusDays(loanTime);
         List<Long> clientIds = borrowerRepository.findAllClientIdByLoanDateBefore(localDate);
         List<Client> clients = clientRepository.findAllById(clientIds);

@@ -1,6 +1,7 @@
 package ru.sunbrothers.library.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -8,10 +9,8 @@ import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Entity
-//@NoArgsConstructor
 @Data
-//@EqualsAndHashCode(exclude = "books")
-//@ToString(exclude = "books")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "client")
 public class Client {
 
@@ -21,6 +20,7 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "Имя не указано")

@@ -1,6 +1,9 @@
 package ru.sunbrothers.library.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.sunbrothers.library.dto.BookDto;
@@ -14,12 +17,17 @@ import java.util.List;
 @RequestMapping("api/book")
 public class BookController {
 
+    private final BookService bookService;
+
     @Autowired
-    private BookService bookService;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping("/all")
-    public ResponseEntity<List<BookDto>> getAllAuthors(){
-        List<BookDto> bookDtos = bookService.getAllBooks();
+    public ResponseEntity<List<BookDto>> getAllAuthors(
+            @PageableDefault(sort = {"bookName"}, direction = Sort.Direction.ASC) Pageable pageable){
+        List<BookDto> bookDtos = bookService.getAllBooks(pageable);
         if (bookDtos.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok().body(bookDtos);
     }
@@ -78,7 +86,8 @@ public class BookController {
     }
 
     @PutMapping("/update/{bookId}")
-    public ResponseEntity<BookDto> updateBook(@PathVariable Long bookId, @Valid @RequestBody Book book){
+    public ResponseEntity<BookDto> updateBook(@PathVariable Long bookId,
+                                              @Valid @RequestBody Book book){
         BookDto bookById = bookService.getBookById(bookId);
         if (bookById == null) return ResponseEntity.notFound().build();
         book.setId(bookId);

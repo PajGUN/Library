@@ -2,6 +2,7 @@ package ru.sunbrothers.library.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.sunbrothers.library.dto.ClientDto;
 import ru.sunbrothers.library.model.Borrower;
@@ -17,15 +18,18 @@ import java.util.List;
 @Slf4j
 public class ClientService {
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
+    private final BorrowerRepository borrowerRepository;
 
     @Autowired
-    private BorrowerRepository borrowerRepository;
+    public ClientService(ClientRepository clientRepository, BorrowerRepository borrowerRepository) {
+        this.clientRepository = clientRepository;
+        this.borrowerRepository = borrowerRepository;
+    }
 
-    public List<ClientDto> getAllClients() {
+    public List<ClientDto> getAllClients(Pageable pageable) {
         List<ClientDto> clientDtos = new ArrayList<>();
-        for (Client client : clientRepository.findAll()) {
+        for (Client client : clientRepository.findAll(pageable)) {
             ClientDto clientDto = getClientDto(client);
             clientDtos.add(clientDto);
         }
