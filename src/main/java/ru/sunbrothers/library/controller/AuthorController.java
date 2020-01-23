@@ -42,7 +42,7 @@ public class AuthorController {
     @GetMapping("/getbybookname/{bookname}")
     public ResponseEntity<List<AuthorDto>> getAuthorByBookname(@PathVariable String bookname){
         List<AuthorDto> authors = authorService.getAuthorByBookname(bookname);
-        if (authors == null) return ResponseEntity.notFound().build();
+        if (authors.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(authors);
     }
 
@@ -77,10 +77,8 @@ public class AuthorController {
     @PutMapping("/update/{id}")
     public ResponseEntity<AuthorDto> updateAuthor(@PathVariable Long id,
                                                   @Valid @RequestBody Author author){
-        AuthorDto authorById = authorService.getAuthorById(id);
-        if (authorById == null) return ResponseEntity.notFound().build();
-        author.setId(id);
-        AuthorDto authorDto = authorService.save(author);
+        AuthorDto authorDto = authorService.update(id, author);
+        if (authorDto == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(authorDto);
     }
 }

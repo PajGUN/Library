@@ -3,11 +3,9 @@ package ru.sunbrothers.library.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sunbrothers.library.dto.AuthorDto;
 import ru.sunbrothers.library.dto.BookDto;
-import ru.sunbrothers.library.model.Author;
+import ru.sunbrothers.library.dto.MapperUtil;
 import ru.sunbrothers.library.model.Book;
 import ru.sunbrothers.library.model.Borrower;
 import ru.sunbrothers.library.model.Client;
@@ -17,13 +15,11 @@ import ru.sunbrothers.library.repository.ClientRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
-@EnableTransactionManagement
 public class BorrowerService {
 
     private final BorrowerRepository borrowerRepository;
@@ -45,13 +41,13 @@ public class BorrowerService {
             if (book.getCurrentCount().equals(0)) {
                 log.info("Книги - {} нет в наличии! Количество экземпляров - {}.",
                         book.getBookName(), book.getTotalCount());
-                return null;
+                return Collections.emptyList();
             }
             Borrower matchBorrower = borrowerRepository.findBorrowerByClientIdAndBookId(client.getId(), book.getId());
             if (matchBorrower != null) {
                 log.info("У клиента с Id - {} на руках уже есть книга - {}.",
                         borrower.getClientId(), book.getBookName());
-                return null;
+                return Collections.emptyList();
             }
             borrowerRepository.save(borrower);
             book.setCurrentCount(book.getCurrentCount()-1);
@@ -59,7 +55,7 @@ public class BorrowerService {
             return getBookDtos(borrower.getClientId());
         } catch (EntityNotFoundException e) {
             log.error(e.getMessage());
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -72,9 +68,7 @@ public class BorrowerService {
                         clientId, bookId);
                 return null;
             }
-
             Book book = bookRepository.getOne(bookId);
-
             book.setCurrentCount(book.getCurrentCount()+1);
             bookRepository.save(book);
             borrowerRepository.delete(matchBorrower);
@@ -87,6 +81,7 @@ public class BorrowerService {
         // если был просрок добавить клиенту штраф
     }
 
+    @Transactional
     public List<BookDto> getAllBooks(Long clientId) {
         return getBookDtos(clientId);
     }
@@ -97,35 +92,9 @@ public class BorrowerService {
         List<Long> bookIds = borrowerRepository.findBookIdsByClientId(clientId);
         List<Book> books = bookRepository.findAllById(bookIds);
         for (Book book : books) {
-            BookDto bookDto = getBookDto(book);
+            BookDto bookDto = MapperUtil.mapToBookDto(book);
             bookDtos.add(bookDto);
         }
         return bookDtos;
-    }
-
-    private BookDto getBookDto(Book book) {
-        BookDto bookDto = new BookDto();
-
-        bookDto.setId(book.getId());
-        bookDto.setBookName(book.getBookName());
-        bookDto.setPublishingHouse(book.getPublishingHouse());
-        bookDto.setTotalCount(book.getTotalCount());
-        bookDto.setCurrentCount(book.getCurrentCount());
-
-        Set<Author> authors = book.getAuthors();
-        if (authors == null) return bookDto;
-
-        Set<AuthorDto> authorList = new HashSet<>();
-        for (Author author : authors){
-            AuthorDto authorDto = new AuthorDto();
-
-            authorDto.setId(author.getId());
-            authorDto.setFirstName(author.getFirstName());
-            authorDto.setLastName(author.getLastName());
-            authorDto.setMiddleName(author.getMiddleName());
-            authorList.add(authorDto);
-        }
-        bookDto.setAuthors(authorList);
-        return bookDto;
     }
 }

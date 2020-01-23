@@ -1,6 +1,7 @@
 package ru.sunbrothers.library.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ public class ReportController {
     @GetMapping("/expiredbookclients")
     public ResponseEntity<List<ClientDtoExpired>> getAllClientsWithExpiredBooks(){
         List<ClientDtoExpired> clientDtos = reportService.getAllClientsWithExpiredBooks();
+        if (clientDtos == null || clientDtos.isEmpty()) return new ResponseEntity<>(HttpStatus.CONFLICT);
         return ResponseEntity.ok(clientDtos);
     }
 }

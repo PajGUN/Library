@@ -19,6 +19,4 @@ public class BookDto {
     private Integer currentCount;
 
     private Set<AuthorDto> authors;
-
-//    private Set<Client> clients;
 }

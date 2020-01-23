@@ -44,12 +44,12 @@ public class BookController {
         String[] name = authorName.split(" ");
         if (name.length == 1) {
             List<BookDto> bookDtos = bookService.getBookByAuthorname(authorName);
-            if (bookDtos == null) return ResponseEntity.notFound().build();
+            if (bookDtos.isEmpty()) return ResponseEntity.notFound().build();
             return ResponseEntity.ok(bookDtos);
         }
         else if (name.length == 2) {
             List<BookDto> bookDtos = bookService.getBookByFirstAndLastName(name[0], name[1]);
-            if (bookDtos == null) return ResponseEntity.notFound().build();
+            if (bookDtos.isEmpty()) return ResponseEntity.notFound().build();
             return ResponseEntity.ok(bookDtos);
         }
         else {
@@ -88,10 +88,8 @@ public class BookController {
     @PutMapping("/update/{bookId}")
     public ResponseEntity<BookDto> updateBook(@PathVariable Long bookId,
                                               @Valid @RequestBody Book book){
-        BookDto bookById = bookService.getBookById(bookId);
-        if (bookById == null) return ResponseEntity.notFound().build();
-        book.setId(bookId);
-        BookDto bookDto = bookService.save(book);
+        BookDto bookDto = bookService.update(bookId, book);
+        if (bookDto == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(bookDto);
     }
 }
